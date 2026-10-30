@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Synchronized charts for CanvasJS: examples</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --paper: #f5f6f8;
+            --surface: #ffffff;
+            --ink: #0e1b2c;
+            --muted: #566377;
+            --rule: #d9dee5;
+            --accent: #1b5bd8;
+            --accent-soft: #e8effd;
+            --code-bg: #0e1b2c;
+            --code-ink: #dbe4f3;
+            --font: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--font);
+            font-size: 17px;
+            line-height: 1.55;
+        }
+
+        a {
+            color: var(--accent);
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 56px 24px 96px;
+        }
+
+        header {
+            margin-bottom: 64px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4.5vw, 3rem);
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin: 0 0 16px;
+            font-weight: 700;
+        }
+
+        header p {
+            color: var(--muted);
+            margin: 0 0 24px;
+            max-width: 60ch;
+        }
+
+        pre {
+            margin: 0;
+            padding: 16px 18px;
+            background: var(--code-bg);
+            color: var(--code-ink);
+            font: 13.5px/1.6 var(--mono);
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        code {
+            font-family: var(--mono);
+        }
+
+        p code,
+        li code,
+        label code {
+            background: var(--accent-soft);
+            color: #143d94;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.88em;
+        }
+
+        section.example {
+            display: grid;
+            grid-template-columns: 300px minmax(0, 1fr);
+            gap: 40px;
+            padding: 40px 0;
+            border-top: 1px solid var(--rule);
+        }
+
+        .notes h2 {
+            font-size: 1.35rem;
+            line-height: 1.25;
+            margin: 0 0 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .notes p {
+            color: var(--muted);
+            margin: 0 0 16px;
+            font-size: 0.97rem;
+        }
+
+        .notes ul {
+            color: var(--muted);
+            font-size: 0.95rem;
+            padding-left: 18px;
+            margin: 0 0 20px;
+        }
+
+        .notes li {
+            margin-bottom: 6px;
+        }
+
+        .notes pre {
+            font-size: 12px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+        }
+
+        .panel .chart {
+            width: 100%;
+            border-top: 1px solid var(--rule);
+        }
+
+        .panel .chart:first-child {
+            border-top: 0;
+        }
+
+        .panel-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 20px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--rule);
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .panel-bar .status {
+            margin-right: auto;
+        }
+
+        button,
+        select {
+            font: inherit;
+            font-size: 0.9rem;
+            color: var(--ink);
+            background: var(--surface);
+            border: 1px solid #b9c2cf;
+            border-radius: 4px;
+            padding: 5px 12px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        button.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: #164ab0;
+            color: #fff;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 18px;
+            align-items: center;
+        }
+
+        .controls label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        .controls input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--accent);
+        }
+
+        footer {
+            border-top: 1px solid var(--rule);
+            padding-top: 24px;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 860px) {
+            section.example {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .page {
+                padding-top: 36px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <header>
+            <h1>Synchronized charts for CanvasJS</h1>
+            <p>Link zoom, pan, tooltip and crosshair across any number of charts with one call, and keep their plot
+                areas lined up even when the axis labels differ in width.</p>
+            <pre><code>&lt;script src="https://cdn.canvasjs.com/canvasjs.min.js"&gt;&lt;/script&gt;
+&lt;script src="canvasjs-sync-charts.js"&gt;&lt;/script&gt;
+
+var sync = CanvasJS.syncCharts([chart1, chart2, chart3]);</code></pre>
+        </header>
+
+        <!-- Example 1 -->
+        <section class="example" id="market">
+            <div class="notes">
+                <h2>Price, volume and momentum</h2>
+                <p>Three charts share one timeline. Drag across any chart to zoom, use the pan button to move, and hover
+                    to read all three values for the same day.</p>
+                <ul>
+                    <li>The price axis has dollar labels, the volume axis has abbreviated numbers. The plot areas still
+                        line up.</li>
+                    <li>The reset button on any chart resets all of them.</li>
+                </ul>
+                <pre><code>CanvasJS.syncCharts(
+  [price, volume, momentum],
+  { alignPlotAreas: true }
+);</code></pre>
+            </div>
+            <div class="panel">
+                <div class="panel-bar">
+                    <span class="status" id="market-status"></span>
+                    <button type="button" id="market-reset">Reset zoom</button>
+                </div>
+                <div class="chart" id="price" style="height:230px"></div>
+                <div class="chart" id="volume" style="height:150px"></div>
+                <div class="chart" id="momentum" style="height:190px"></div>
+            </div>
+        </section>
+
+        <!-- Example 2 -->
+        <section class="example" id="rates">
+            <div class="notes">
+                <h2>Different sampling rates</h2>
+                <p>Server CPU is sampled every minute, memory every five, and queue depth every fifteen. Hover over the
+                    CPU chart and the other tooltips jump to the nearest sample they actually have.</p>
+                <ul>
+                    <li><code>snap: "nearest"</code> is the default.</li>
+                    <li>Use <code>snap: "exact"</code> to show a tooltip only where an identical x value exists.</li>
+                </ul>
+                <pre><code>CanvasJS.syncCharts(
+  [cpu, memory, queue],
+  { snap: "nearest" }
+);</code></pre>
+            </div>
+            <div class="panel">
+                <div class="panel-bar">
+                    <span class="status">Samples: 1 min, 5 min and 15 min</span>
+                    <button type="button" id="rates-reset">Reset zoom</button>
+                </div>
+                <div class="chart" id="cpu" style="height:180px"></div>
+                <div class="chart" id="memory" style="height:180px"></div>
+                <div class="chart" id="queue" style="height:180px"></div>
+            </div>
+        </section>
+
+        <!-- Example 3 -->
+        <section class="example" id="playground">
+            <div class="notes">
+                <h2>Try the options</h2>
+                <p>Turn features on and off, add or remove a chart, or destroy the link and watch each chart return to
+                    how it was configured.</p>
+                <ul>
+                    <li>The three charts use very different value ranges, so turning off alignment shows what it fixes.
+                    </li>
+                    <li><code>axisY: "shared"</code> also links the Y range when you zoom on both axes. Drag a box on a
+                        chart to try it.</li>
+                </ul>
+                <pre><code>var sync = CanvasJS.syncCharts(charts, {
+  zoom: true,
+  tooltip: true,
+  crosshair: true,
+  alignPlotAreas: true,
+  axisY: "independent"
+});
+
+sync.add(chart4);
+sync.remove(chart2);
+sync.reset();
+sync.destroy();</code></pre>
+            </div>
+            <div class="panel">
+                <div class="panel-bar">
+                    <div class="controls" id="pg-controls">
+                        <label><input type="checkbox" id="opt-zoom" checked> Zoom and pan</label>
+                        <label><input type="checkbox" id="opt-tooltip" checked> Tooltip</label>
+                        <label><input type="checkbox" id="opt-crosshair" checked> Crosshair</label>
+                        <label><input type="checkbox" id="opt-align" checked> Align plot areas</label>
+                        <label><input type="checkbox" id="opt-sharedy"> Share Y range</label>
+                    </div>
+                </div>
+                <div class="panel-bar">
+                    <span class="status" id="pg-status"></span>
+                    <button type="button" id="pg-toggle">Remove third chart</button>
+                    <button type="button" id="pg-reset">Reset zoom</button>
+                    <button type="button" id="pg-link" class="primary">Destroy link</button>
+                </div>
+                <div class="chart" id="pg1" style="height:170px"></div>
+                <div class="chart" id="pg2" style="height:170px"></div>
+                <div class="chart" id="pg3" style="height:170px"></div>
+            </div>
+        </section>
+
+        <footer>
+            Requires CanvasJS and a valid CanvasJS license.
+        </footer>
+    </div>
+
+    <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+    <script src="src/canvasjs-sync-charts.js"></script>
+    <script>
+        (function () {
+            "use strict";
+
+            var COLORS = { blue: "#1b5bd8", teal: "#0f9d8a", amber: "#d9820b", rose: "#c2385a" };
+            var FONT = "Instrument Sans, system-ui, sans-serif";
+
+            // Small seeded random generator so every visit shows the same data
+            function rng(seed) {
+                return function () {
+                    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+                    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+                    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+                    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+                };
+            }
+
+            function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+            function baseOptions(title, extra) {
+                var o = {
+                    animationEnabled: false,
+                    zoomEnabled: true,
+                    zoomType: "x",
+                    theme: "light1",
+                    backgroundColor: "transparent",
+                    fontFamily: FONT,
+                    title: { text: title, fontSize: 14, fontWeight: "600", horizontalAlign: "left", padding: 6, margin: 4 },
+                    axisX: { crosshair: { enabled: true, snapToDataPoint: false }, lineColor: "#b9c2cf", tickColor: "#b9c2cf" },
+                    axisY: { gridColor: "#e8ebef", lineColor: "#b9c2cf", tickColor: "#b9c2cf" }
+                };
+                for (var k in extra) o[k] = extra[k];
+                return o;
+            }
+
+            /* ---------- Example 1: price, volume, momentum ---------- */
+            (function () {
+                var rand = rng(11), day = 86400000, start = new Date(2026, 0, 5).getTime();
+                var price = [], volume = [], momentum = [], closes = [], p = 182;
+                for (var i = 0; i < 180; i++) {
+                    var x = new Date(start + i * day);
+                    p = Math.max(120, p + (rand() - 0.47) * 4.2);
+                    closes.push(p);
+                    var window14 = closes.slice(-14), avg = 0;
+                    for (var j = 0; j < window14.length; j++) avg += window14[j];
+                    avg /= window14.length;
+                    price.push({ x: x, y: Math.round(p * 100) / 100 });
+                    volume.push({ x: x, y: Math.round(7e6 + rand() * 9e6 + Math.abs(p - avg) * 6e5) });
+                    momentum.push({ x: x, y: Math.round(clamp(50 + (p - avg) * 5, 5, 95) * 10) / 10 });
+                }
+                var hideX = { labelFormatter: function () { return ""; }, tickLength: 0 };
+
+                var c1 = new CanvasJS.Chart("price", baseOptions("Price", {
+                    axisX: { crosshair: { enabled: true }, labelFormatter: hideX.labelFormatter, tickLength: 0, lineColor: "#b9c2cf" },
+                    axisY: { prefix: "$", valueFormatString: "#,##0", gridColor: "#e8ebef", lineColor: "#b9c2cf" },
+                    data: [{
+                        type: "area", color: COLORS.blue, fillOpacity: 0.12, lineThickness: 2, markerSize: 0,
+                        xValueType: "dateTime", xValueFormatString: "DD MMM YYYY", yValueFormatString: "$#,##0.00", dataPoints: price
+                    }]
+                }));
+                var c2 = new CanvasJS.Chart("volume", baseOptions("Volume", {
+                    axisX: { crosshair: { enabled: true }, labelFormatter: hideX.labelFormatter, tickLength: 0, lineColor: "#b9c2cf" },
+                    axisY: { labelFormatter: function (e) { return (e.value / 1e6).toFixed(0) + "M"; }, gridColor: "#e8ebef", lineColor: "#b9c2cf" },
+                    data: [{
+                        type: "column", color: COLORS.teal, xValueType: "dateTime", xValueFormatString: "DD MMM YYYY",
+                        yValueFormatString: "#,##0", dataPoints: volume
+                    }]
+                }));
+                var c3 = new CanvasJS.Chart("momentum", baseOptions("Momentum", {
+                    axisX: { crosshair: { enabled: true }, valueFormatString: "MMM D", lineColor: "#b9c2cf" },
+                    axisY: {
+                        minimum: 0, maximum: 100, interval: 25, gridColor: "#e8ebef", lineColor: "#b9c2cf",
+                        stripLines: [{ value: 70, color: COLORS.rose, thickness: 1, lineDashType: "dash" },
+                        { value: 30, color: COLORS.rose, thickness: 1, lineDashType: "dash" }]
+                    },
+                    data: [{
+                        type: "line", color: COLORS.amber, lineThickness: 2, markerSize: 0,
+                        xValueType: "dateTime", xValueFormatString: "DD MMM YYYY", dataPoints: momentum
+                    }]
+                }));
+                c1.render(); c2.render(); c3.render();
+
+                var sync = CanvasJS.syncCharts([c1, c2, c3], { alignPlotAreas: true });
+                document.getElementById("market-status").textContent = "180 days, " + sync.charts().length + " charts linked";
+                document.getElementById("market-reset").addEventListener("click", function () { sync.reset(); });
+            })();
+
+            /* ---------- Example 2: different sampling rates ---------- */
+            (function () {
+                var rand = rng(29), minute = 60000, start = new Date(2026, 9, 26, 6, 0).getTime();
+                var cpu = [], mem = [], queue = [], load = 40;
+                for (var m = 0; m < 360; m++) {
+                    load = clamp(load + (rand() - 0.5) * 9 + Math.sin(m / 40) * 1.2, 8, 96);
+                    var t = new Date(start + m * minute);
+                    cpu.push({ x: t, y: Math.round(load * 10) / 10 });
+                    if (m % 5 === 0) mem.push({ x: t, y: Math.round((6 + load / 18 + rand() * 0.6) * 100) / 100 });
+                    if (m % 15 === 0) queue.push({ x: t, y: Math.round(Math.max(0, (load - 35) * 3 + rand() * 30)) });
+                }
+                var common = { xValueType: "dateTime", xValueFormatString: "HH:mm" };
+                var c1 = new CanvasJS.Chart("cpu", baseOptions("CPU, every minute", {
+                    axisX: { crosshair: { enabled: true }, labelFormatter: function () { return ""; }, tickLength: 0, lineColor: "#b9c2cf" },
+                    axisY: { suffix: "%", maximum: 100, gridColor: "#e8ebef", lineColor: "#b9c2cf" },
+                    data: [Object.assign({ type: "line", color: COLORS.blue, lineThickness: 1.5, markerSize: 0, yValueFormatString: "0.0", dataPoints: cpu }, common)]
+                }));
+                var c2 = new CanvasJS.Chart("memory", baseOptions("Memory, every 5 minutes", {
+                    axisX: { crosshair: { enabled: true }, labelFormatter: function () { return ""; }, tickLength: 0, lineColor: "#b9c2cf" },
+                    axisY: { suffix: " GB", gridColor: "#e8ebef", lineColor: "#b9c2cf" },
+                    data: [Object.assign({ type: "line", color: COLORS.teal, lineThickness: 2, markerSize: 5, yValueFormatString: "0.00", dataPoints: mem }, common)]
+                }));
+                var c3 = new CanvasJS.Chart("queue", baseOptions("Queue depth, every 15 minutes", {
+                    axisX: { crosshair: { enabled: true }, valueFormatString: "HH:mm", lineColor: "#b9c2cf" },
+                    axisY: { gridColor: "#e8ebef", lineColor: "#b9c2cf" },
+                    data: [Object.assign({ type: "column", color: COLORS.amber, yValueFormatString: "#,##0", dataPoints: queue }, common)]
+                }));
+                c1.render(); c2.render(); c3.render();
+                var sync = CanvasJS.syncCharts([c1, c2, c3], { snap: "nearest" });
+                document.getElementById("rates-reset").addEventListener("click", function () { sync.reset(); });
+            })();
+
+            /* ---------- Example 3: playground ---------- */
+            (function () {
+                var rand = rng(5), n = 120, a = [], b = [], c = [], v1 = 0.5, v2 = 4200, v3 = 3.2e6;
+                for (var i = 0; i < n; i++) {
+                    v1 = clamp(v1 + (rand() - 0.5) * 0.12, 0, 1);
+                    v2 = Math.max(500, v2 + (rand() - 0.5) * 420);
+                    v3 = Math.max(1e6, v3 + (rand() - 0.5) * 3e5);
+                    a.push({ x: i, y: Math.round(v1 * 100) / 100 });
+                    b.push({ x: i, y: Math.round(v2) });
+                    c.push({ x: i, y: Math.round(v3) });
+                }
+                function mk(id, title, color, data, fmt) {
+                    return new CanvasJS.Chart(id, baseOptions(title, {
+                        axisY: { labelFormatter: fmt, gridColor: "#e8ebef", lineColor: "#b9c2cf" },
+                        data: [{ type: "line", color: color, lineThickness: 2, markerSize: 0, dataPoints: data }]
+                    }));
+                }
+                var charts = [
+                    mk("pg1", "Ratio", COLORS.blue, a, function (e) { return e.value.toFixed(2); }),
+                    mk("pg2", "Requests", COLORS.teal, b, function (e) { return e.value.toLocaleString(); }),
+                    mk("pg3", "Total bytes", COLORS.rose, c, function (e) { return e.value.toLocaleString() + " bytes"; })
+                ];
+                charts.forEach(function (ch) { ch.render(); });
+
+                var sync = null, thirdIn = true;
+                var el = function (id) { return document.getElementById(id); };
+                var status = el("pg-status"), toggle = el("pg-toggle"), linkBtn = el("pg-link");
+
+                function currentOptions() {
+                    return {
+                        zoom: el("opt-zoom").checked,
+                        tooltip: el("opt-tooltip").checked,
+                        crosshair: el("opt-crosshair").checked,
+                        alignPlotAreas: el("opt-align").checked,
+                        axisY: el("opt-sharedy").checked ? "shared" : "independent"
+                    };
+                }
+
+                function members() { return thirdIn ? charts : charts.slice(0, 2); }
+
+                function link() {
+                    if (sync) sync.destroy();
+                    sync = CanvasJS.syncCharts(members(), currentOptions());
+                    update();
+                }
+
+                function update() {
+                    status.textContent = sync ? (sync.charts().length + " charts linked") : "Not linked";
+                    linkBtn.textContent = sync ? "Destroy link" : "Link charts";
+                    linkBtn.className = sync ? "" : "primary";
+                    toggle.textContent = thirdIn ? "Remove third chart" : "Add third chart";
+                }
+
+                el("pg-controls").addEventListener("change", function () { if (sync) link(); });
+
+                toggle.addEventListener("click", function () {
+                    thirdIn = !thirdIn;
+                    if (sync) {
+                        if (thirdIn) sync.add(charts[2]); else sync.remove(charts[2]);
+                    }
+                    update();
+                });
+
+                el("pg-reset").addEventListener("click", function () {
+                    if (sync) sync.reset();
+                });
+
+                linkBtn.addEventListener("click", function () {
+                    if (sync) { sync.destroy(); sync = null; update(); } else { link(); }
+                });
+
+                link();
+            })();
+        })();
+    </script>
+</body>
+
+</html>

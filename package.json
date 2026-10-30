@@ -1,0 +1,30 @@
+{
+  "name": "canvasjs-sync-charts",
+  "version": "1.0.0",
+  "description": "Synchronize zoom/pan, tooltip and crosshair across multiple CanvasJS charts with a single call, and line up their plot areas.",
+  "main": "src/canvasjs-sync-charts.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vishwas-r/CanvasJS-Sync-Charts.git"
+  },
+  "keywords": [
+    "canvasjs",
+    "charts",
+    "synchronized",
+    "sync-charts",
+    "dashboard",
+    "crosshair",
+    "zoom",
+    "tooltip",
+    "data-visualization"
+  ],
+  "author": "Vishwas R",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vishwas-r/CanvasJS-Sync-Charts/issues"
+  },
+  "homepage": "https://github.com/vishwas-r/CanvasJS-Sync-Charts#readme"
+}
